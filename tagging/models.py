@@ -233,9 +233,9 @@ class TagManager(models.Manager):
         cursor.execute(query, params)
         related = []
         for row in cursor.fetchall():
-            tag = self.model(*row[:2])
+            tag = self.model(*row[:3])
             if counts is True:
-                tag.count = row[2]
+                tag.count = row[3]
             related.append(tag)
         return related
 
