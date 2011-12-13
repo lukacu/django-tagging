@@ -5,6 +5,7 @@ calculation.
 import math
 import types
 
+from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext as _
@@ -165,7 +166,8 @@ def get_tag_list(tags):
     elif isinstance(tags, QuerySet) and tags.model is Tag:
         return tags
     elif isinstance(tags, types.StringTypes):
-        return Tag.objects.filter(name__in=parse_tag_input(tags))
+        tag_input = parse_tag_input(tags)
+        return Tag.objects.filter(models.Q(name__in=tag_input) | models.Q(slug__in=tag_input))
     elif isinstance(tags, (types.ListType, types.TupleType)):
         if len(tags) == 0:
             return tags
@@ -179,8 +181,8 @@ def get_tag_list(tags):
                 contents.add('int')
         if len(contents) == 1:
             if 'string' in contents:
-                return Tag.objects.filter(name__in=[force_unicode(tag) \
-                                                    for tag in tags])
+                tag_input = [force_unicode(tag) for tag in tags]
+                return Tag.objects.filter(models.Q(name__in=tag_input) | models.Q(slug__in=tag_input))
             elif 'tag' in contents:
                 return tags
             elif 'int' in contents:
@@ -207,7 +209,7 @@ def get_tag(tag):
 
     try:
         if isinstance(tag, types.StringTypes):
-            return Tag.objects.get(name=tag)
+            return Tag.objects.get(models.Q(name=tag) | models.Q(slug=tag))
         elif isinstance(tag, (types.IntType, types.LongType)):
             return Tag.objects.get(id=tag)
     except Tag.DoesNotExist:
