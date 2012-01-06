@@ -3,8 +3,6 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
-from base_libs.utils.misc import south_clean_multilingual_fields
-from base_libs.utils.misc import south_cleaned_fields
 
 class Migration(SchemaMigration):
     
@@ -42,6 +40,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'items'", 'to': "orm['tagging.Tag']"})
         }
     }
-    south_clean_multilingual_fields(models)
-    
+
     complete_apps = ['tagging']
