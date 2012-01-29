@@ -1,9 +1,12 @@
+# -*- Mode: python; indent-tabs-mode: nil; c-basic-offset: 2; tab-width: 2 -*- 
 """
 Tagging related views.
 """
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.utils.translation import ugettext as _
 from django.views.generic.list_detail import object_list
+from django.core import serializers
+from django.utils import simplejson 
 
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, get_queryset_and_model
@@ -50,3 +53,18 @@ def tagged_object_list(request, queryset_or_model=None, tag=None,
             Tag.objects.related_for_model(tag_instance, queryset_or_model,
                                           counts=related_tag_counts)
     return object_list(request, queryset, **kwargs)
+
+def json_autocomplete(request):
+  try:
+    if request.GET.has_key("term"):
+      tags = Tag.objects.filter(name__istartswith=request.GET['term']).values_list('name', flat=True)
+    else:
+      tags = []
+  except MultiValueDictKeyError:
+    tags = []  
+  except UnboundLocalError:
+    tags = []
+  return HttpResponse(simplejson.dumps([t.encode('utf-8') for t in tags]), mimetype='application/json; charset=UTF-8')
+
+
+
